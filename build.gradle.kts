@@ -40,28 +40,6 @@ tasks.named<Jar>("jar") {
 
 
 
-val createJre = tasks.register<Exec>("createJre") {
-	val jreDir = layout.buildDirectory.dir("libs/jre").get().asFile
-	doFirst {
-		if (jreDir.exists()) {
-			jreDir.deleteRecursively()
-		}
-	}
-	val javaHome = System.getProperty("java.home")
-	val isWindows = System.getProperty("os.name").lowercase().contains("windows")
-	val jlinkExec = if (isWindows) "$javaHome/bin/jlink.exe" else "$javaHome/bin/jlink"
-
-	commandLine(
-		jlinkExec,
-		"--add-modules", "java.base,java.desktop,java.logging,java.net.http,java.scripting,java.sql,java.naming,java.management,java.xml,jdk.unsupported",
-		"--strip-debug",
-		"--no-man-pages",
-		"--no-header-files",
-		"--compress=zip-6",
-		"--output", jreDir.absolutePath
-	)
-}
-
 val createLauncher = tasks.register("createLauncher") {
 	val batFile = layout.buildDirectory.file("libs/graffiti.bat").get().asFile
 	outputs.file(batFile)
@@ -70,12 +48,11 @@ val createLauncher = tasks.register("createLauncher") {
 			"""
 			@echo off
 			set "APP_DIR=%~dp0"
-			"%APP_DIR%jre\bin\java.exe" --enable-native-access=ALL-UNNAMED -jar "%APP_DIR%graffiti.jar" %*
+			"%APP_DIR%runtime\bin\java.exe" --enable-native-access=ALL-UNNAMED -jar "%APP_DIR%app\graffiti.jar" %*
 			""".trimIndent()
 		)
 	}
 }
-
 
 val copyLib = tasks.register<Copy>("copyLib") {
 	from(file("lib"))
@@ -87,14 +64,52 @@ val copyWeb = tasks.register<Copy>("copyWeb") {
 	into(layout.buildDirectory.dir("libs/web"))
 }
 
+val createAppImage = tasks.register<Exec>("createAppImage") {
+	dependsOn("jar", copyLib, copyWeb, createLauncher)
+
+	val outputDir = layout.buildDirectory.dir("tmp/app-image/Graffiti").get().asFile
+	outputs.dir(outputDir)
+
+	doFirst {
+		if (outputDir.exists()) {
+			outputDir.deleteRecursively()
+		}
+	}
+
+	val javaHome = System.getProperty("java.home")
+	val isWindows = System.getProperty("os.name").lowercase().contains("windows")
+	val jpackageExec = if (isWindows) "$javaHome/bin/jpackage.exe" else "$javaHome/bin/jpackage"
+
+	val iconFile = file("../GraffitiCore/src/main/resources/web/favicon.ico")
+
+	commandLine(
+		jpackageExec,
+		"--name", "Graffiti",
+		"--input", layout.buildDirectory.dir("libs").get().asFile.absolutePath,
+		"--main-jar", "graffiti.jar",
+		"--main-class", "r3.gui.MainKt",
+		"--type", "app-image",
+		"--icon", iconFile.absolutePath,
+		"--java-options", "--enable-native-access=ALL-UNNAMED",
+		"--dest", layout.buildDirectory.dir("tmp/app-image").get().asFile.absolutePath
+	)
+
+}
+
 val distZip = tasks.register<Zip>("distZip") {
-	dependsOn("jar", copyLib, copyWeb, createJre, createLauncher)
+	dependsOn(createAppImage)
 	archiveFileName.set("graffiti.zip")
-	destinationDirectory.set(layout.buildDirectory.dir("distributions"))
-	from(layout.buildDirectory.dir("libs").get().asFile) {
-		into("graffiti")
+	destinationDirectory.set(layout.buildDirectory.dir("dist"))
+	from(layout.buildDirectory.dir("tmp/app-image/Graffiti")) {
+		into("Graffiti")
 	}
 }
+
+
+
+
+
+
 
 tasks.withType<JavaExec> {
 	jvmArgs("--enable-native-access=ALL-UNNAMED")

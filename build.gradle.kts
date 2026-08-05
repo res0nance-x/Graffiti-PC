@@ -105,18 +105,16 @@ val distZip = tasks.register<Zip>("distZip") {
 	}
 }
 
+val dist = tasks.register("dist") {
+	group = "distribution"
+	description = "Cleans and builds fresh application distribution zip."
+	dependsOn("clean", distZip)
+}
 
-
-
-
-
+distZip.get().mustRunAfter("clean")
 
 tasks.withType<JavaExec> {
 	jvmArgs("--enable-native-access=ALL-UNNAMED")
-}
-
-tasks.named("build") {
-	dependsOn(distZip)
 }
 
 tasks.test {

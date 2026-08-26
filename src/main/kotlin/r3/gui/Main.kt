@@ -8,8 +8,6 @@ import r3.http.WebServer
 import r3.pke.name
 import java.io.File
 
-private object MainAnchor
-
 fun main(args: Array<String>) {
 	cli(args)
 }

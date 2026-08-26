@@ -7,28 +7,8 @@ import r3.http.HandlerFactory
 import r3.http.WebServer
 import r3.pke.name
 import java.io.File
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 private object MainAnchor
-
-private fun getBuildNumber(): String {
-	return try {
-		val classUrl = MainAnchor::class.java.getResource("MainAnchor.class")
-		val time = classUrl?.openConnection()?.lastModified ?: 0L
-		if (time > 0L) {
-			val instant = Instant.ofEpochMilli(time)
-			val formatter = DateTimeFormatter.ofPattern("yyyy-DDD-HH:mm")
-				.withZone(ZoneId.systemDefault())
-			formatter.format(instant)
-		} else {
-			"dev"
-		}
-	} catch (e: Exception) {
-		"dev"
-	}
-}
 
 fun main(args: Array<String>) {
 	cli(args)

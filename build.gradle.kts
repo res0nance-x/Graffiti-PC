@@ -40,20 +40,6 @@ tasks.named<Jar>("jar") {
 
 
 
-val createLauncher = tasks.register("createLauncher") {
-	val batFile = layout.buildDirectory.file("libs/graffiti.bat").get().asFile
-	outputs.file(batFile)
-	doLast {
-		batFile.writeText(
-			"""
-			@echo off
-			set "APP_DIR=%~dp0"
-			"%APP_DIR%runtime\bin\java.exe" --enable-native-access=ALL-UNNAMED -jar "%APP_DIR%app\graffiti.jar" %*
-			""".trimIndent()
-		)
-	}
-}
-
 val copyLib = tasks.register<Copy>("copyLib") {
 	from(file("lib"))
 	into(layout.buildDirectory.dir("libs/lib"))
@@ -65,7 +51,7 @@ val copyWeb = tasks.register<Copy>("copyWeb") {
 }
 
 val createAppImage = tasks.register<Exec>("createAppImage") {
-	dependsOn("jar", copyLib, copyWeb, createLauncher)
+	dependsOn("jar", copyLib, copyWeb)
 
 	val outputDir = layout.buildDirectory.dir("tmp/app-image/Graffiti").get().asFile
 	outputs.dir(outputDir)
@@ -91,13 +77,28 @@ val createAppImage = tasks.register<Exec>("createAppImage") {
 		"--type", "app-image",
 		"--icon", iconFile.absolutePath,
 		"--java-options", "--enable-native-access=ALL-UNNAMED",
+		"--jlink-options", "--strip-debug --no-man-pages --no-header-files",
 		"--dest", layout.buildDirectory.dir("tmp/app-image").get().asFile.absolutePath
 	)
+}
 
+val createLauncher = tasks.register("createLauncher") {
+	dependsOn(createAppImage)
+	val batFile = layout.buildDirectory.file("tmp/app-image/Graffiti/graffiti.bat").get().asFile
+	outputs.file(batFile)
+	doLast {
+		batFile.writeText(
+			"""
+			@echo off
+			set "APP_DIR=%~dp0"
+			"%APP_DIR%runtime\bin\java.exe" --enable-native-access=ALL-UNNAMED -jar "%APP_DIR%app\graffiti.jar" %*
+			""".trimIndent()
+		)
+	}
 }
 
 val distZip = tasks.register<Zip>("distZip") {
-	dependsOn(createAppImage)
+	dependsOn(createLauncher)
 	archiveFileName.set("graffiti.zip")
 	destinationDirectory.set(layout.buildDirectory.dir("dist"))
 	from(layout.buildDirectory.dir("tmp/app-image/Graffiti")) {

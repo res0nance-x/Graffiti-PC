@@ -91,7 +91,7 @@ graph TD
 
 ### Detailed Dependency Hierarchy
 
-#### 1. Foundation: [`R3`](file:///d:/IdeaProjects/R3)
+#### 1. Foundation: R3
 
 `R3` is the base layer providing networking primitives, cryptography, content handling, UPnP port mapping, and lightweight HTTP/WebSocket serving.
 
@@ -107,7 +107,7 @@ graph TD
 
 ---
 
-#### 2. Shared Protocol & Web UI: [`GraffitiCore`](file:///d:/IdeaProjects/GraffitiCore)
+#### 2. Shared Protocol & Web UI: GraffitiCore
 
 `GraffitiCore` implements the P2P networking protocols, the REST/HTTP API layer, and houses the cross-platform Web application assets.
 
@@ -120,7 +120,7 @@ graph TD
 
 ---
 
-#### 3. Desktop Application: [`Graffiti (PC)`](file:///d:/IdeaProjects/Graffiti)
+#### 3. Desktop Application: Graffiti
 
 A standalone Windows desktop application packaged as an app-image using `jpackage`.
 
@@ -137,7 +137,7 @@ A standalone Windows desktop application packaged as an app-image using `jpackag
 
 ---
 
-#### 4. Mobile Application: [`Graffiti (Android)`](file:///d:/StudioProjects/Graffiti)
+#### 4. Mobile Application: Graffiti
 An Android application (minSdk 35, targetSdk 37, compileSdk 37) utilizing Jetpack Compose and foreground services.
 
 * **Linkage to `R3` and `GraffitiCore`**:

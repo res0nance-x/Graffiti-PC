@@ -89,14 +89,14 @@ graph TD
 
 ---
 
+
 ### Detailed Dependency Hierarchy
 
 #### 1. Foundation: R3
-
 `R3` is the base layer providing networking primitives, cryptography, content handling, UPnP port mapping, and lightweight HTTP/WebSocket serving.
 
 * **Embedded/Vendorized Packages**:
-  * `org.nanohttpd.*`: Lightweight HTTP server & WebSocket engine R3/src/main/kotlin/r3/http/WebServer.kt
+  * `org.nanohttpd.*`: Lightweight HTTP server & WebSocket engine R3/src/main/kotlin/r3/http/WebServer.kt.
   * `r3.org.json.*`: JSON parser and object serialization.
 * **Core Subsystems Provided**:
   * `r3.net`: Socket, IP discovery, and JSON communication.
@@ -108,7 +108,6 @@ graph TD
 ---
 
 #### 2. Shared Protocol & Web UI: GraffitiCore
-
 `GraffitiCore` implements the P2P networking protocols, the REST/HTTP API layer, and houses the cross-platform Web application assets.
 
 * **Web UI & Build Tooling**:
@@ -120,14 +119,14 @@ graph TD
 
 ---
 
-#### 3. Desktop Application: Graffiti
+#### 3. Desktop Application: Graffiti-PC
 
 A standalone Windows desktop application packaged as an app-image using `jpackage`.
 
 * **External Maven Dependencies**:
   * `net.java.dev.jna:jna:5.14.0` (Java Native Access)
   * `net.java.dev.jna:jna-platform:5.14.0` (Windows Win32 platform bindings)
-* **Native Binaries & Bundled Libraries** Graffiti/lib:
+* **Native Binaries & Bundled Libraries**:
   * `WebView2Loader.dll`: Microsoft Edge WebView2 runtime loader.
   * `webview.dll`: Native C/C++ WebView wrapper.
   * `FileSelector.exe`: Native Windows file picker helper.
@@ -137,7 +136,7 @@ A standalone Windows desktop application packaged as an app-image using `jpackag
 
 ---
 
-#### 4. Mobile Application: Graffiti
+#### 4. Mobile Application: Graffiti-Android
 An Android application (minSdk 35, targetSdk 37, compileSdk 37) utilizing Jetpack Compose and foreground services.
 
 * **Linkage to `R3` and `GraffitiCore`**:
@@ -147,12 +146,12 @@ An Android application (minSdk 35, targetSdk 37, compileSdk 37) utilizing Jetpac
       getByName("main") {
           java.srcDirs(
               file("src/main/java"),
-              file("~/IdeaProjects/GraffitiCore/src/main/kotlin"),
-              file("~/IdeaProjects/R3/src/main/kotlin")
+              file("../GraffitiCore/src/main/kotlin"),
+              file("../R3/src/main/kotlin")
           )
           assets.srcDirs(
               file("src/main/assets"),
-              file("~/IdeaProjects/GraffitiCore/src/main/resources/web")
+              file("../GraffitiCore/src/main/resources/web")
           )
       }
   }
@@ -174,9 +173,9 @@ An Android application (minSdk 35, targetSdk 37, compileSdk 37) utilizing Jetpac
     * `androidx.test.espresso:espresso-core:3.7.0`
     * `androidx.compose.ui:ui-test-junit4`
 * **Android-Specific Subsystems**:
-  * Graffiti/app/src/main/java/r3/graffiti/GraffitiService.kt: Foreground service keeping `GraffitiP2P` and local `WebServer` alive with WiFi locks and notification management.
-  * Graffiti/app/src/main/java/r3/graffiti/PackMediaPlaybackService.kt: Background playback service for streaming pack media.
-  * Graffiti/app/src/main/java/r3/graffiti/WebViewActivity.kt: Fullscreen WebView rendering `index.html` from assets.
-  * Graffiti/app/src/main/java/r3/graffiti/PackViewActivity.kt): Native Compose UI for inspecting and downloading packs.
-  * Graffiti/app/src/main/java/r3/graffiti/UriSource.kt: Android Storage Access Framework (SAF) adapter for R3 streaming.
+  * Graffiti-Android/app/src/main/java/r3/graffiti/GraffitiService.kt: Foreground service keeping `GraffitiP2P` and local `WebServer` alive with WiFi locks and notification management.
+  * Graffiti-Android/app/src/main/java/r3/graffiti/PackMediaPlaybackService.kt: Background playback service for streaming pack media.
+  * Graffiti-Android/app/src/main/java/r3/graffiti/WebViewActivity.kt: Fullscreen WebView rendering `index.html` from assets.
+  * Graffiti-Android/app/src/main/java/r3/graffiti/PackViewActivity.kt: Native Compose UI for inspecting and downloading packs.
+  * Graffiti-Android/app/src/main/java/r3/graffiti/UriSource.kt: Android Storage Access Framework (SAF) adapter for R3 streaming.
 

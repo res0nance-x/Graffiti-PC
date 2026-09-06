@@ -2,7 +2,7 @@ plugins {
 	kotlin("jvm") version "2.4.0"
 }
 
-group = "r3.graffiti"
+group = "R3"
 version = "1.0"
 
 repositories {
@@ -10,8 +10,8 @@ repositories {
 }
 
 dependencies {
-	implementation("org.example:R3:1.0-SNAPSHOT")
-	implementation("org.example:GraffitiCore:1.0-SNAPSHOT")
+	implementation("R3:R3:1.0")
+	implementation("R3:GraffitiCore:1.0")
 	testImplementation(kotlin("test"))
 	implementation("net.java.dev.jna:jna:5.14.0")
 	implementation("net.java.dev.jna:jna-platform:5.14.0")

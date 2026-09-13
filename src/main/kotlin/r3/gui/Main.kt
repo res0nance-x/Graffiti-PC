@@ -71,6 +71,9 @@ fun cli(args: Array<String>) {
 		onClosePack = { sessionId ->
 			DesktopPackManager.closePack(sessionId)
 		}
+		onBellReceived = { _, sound ->
+			DesktopBellPlayer.play(sound)
+		}
 	}
 	webserver.handlers.add(api)
 	webserver.tempFileManagerFactory = CustomTempFileManagerFactory { p2p.tmpDir }

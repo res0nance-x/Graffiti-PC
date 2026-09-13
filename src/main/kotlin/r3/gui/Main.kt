@@ -71,8 +71,10 @@ fun cli(args: Array<String>) {
 		onClosePack = { sessionId ->
 			DesktopPackManager.closePack(sessionId)
 		}
-		onBellReceived = { _, sound ->
-			DesktopBellPlayer.play(sound)
+		if (!relay && !java.awt.GraphicsEnvironment.isHeadless()) {
+			onBellReceived = { _, sound ->
+				DesktopBellPlayer.play(sound)
+			}
 		}
 	}
 	webserver.handlers.add(api)

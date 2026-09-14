@@ -76,6 +76,16 @@ fun cli(args: Array<String>) {
 				DesktopBellPlayer.play(sound)
 			}
 		}
+		onGetVersion = {
+			val codeSource = NativeResources::class.java.protectionDomain?.codeSource?.location
+			val timestamp = codeSource?.let {
+				runCatching { File(it.toURI()).lastModified() }.getOrNull()
+			}?.takeIf { it > 0L } ?: System.currentTimeMillis()
+			java.time.Instant.ofEpochMilli(timestamp)
+				.atZone(java.time.ZoneId.systemDefault())
+				.toLocalDate()
+				.toString()
+		}
 	}
 	webserver.handlers.add(api)
 	webserver.tempFileManagerFactory = CustomTempFileManagerFactory { p2p.tmpDir }

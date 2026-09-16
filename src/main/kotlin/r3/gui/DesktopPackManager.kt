@@ -70,6 +70,7 @@ object DesktopPackManager {
 					wv.setTitle("PackViewer")
 						.setIcon(NativeResources.webDir.resolve("favicon.ico"))
 						.setSize(1024, 768)
+						.init(packGuardScript())
 						.navigate(url)
 						.run()
 				}
@@ -144,4 +145,57 @@ object DesktopPackManager {
 			RAMPack()
 		}
 	}
+
+	private fun packGuardScript(): String = """
+(function () {
+    'use strict';
+    const SHIELD_SVG = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="220" height="130" viewBox="0 0 220 130">' +
+        '<rect width="100%" height="100%" fill="#111827" stroke="#374151" stroke-width="1.5" rx="6"/>' +
+        '<text x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" font-size="28">🛡️</text>' +
+        '<text x="50%" y="68%" dominant-baseline="middle" text-anchor="middle" fill="#e5e7eb" font-family="sans-serif" font-size="11" font-weight="600">Remote Media Blocked</text>' +
+        '<text x="50%" y="85%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-family="sans-serif" font-size="9">Packs run offline</text>' +
+        '</svg>'
+    );
+
+    function isRemote(url) {
+        if (!url) return false;
+        try {
+            const u = new URL(url, location.href);
+            const h = u.hostname.toLowerCase();
+            return h !== 'localhost' && h !== '127.0.0.1' && h !== '[::1]' && h !== '' && u.protocol.startsWith('http');
+        } catch (_) {
+            return false;
+        }
+    }
+
+    try {
+        const desc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
+        if (desc && desc.set) {
+            const origSet = desc.set;
+            Object.defineProperty(HTMLImageElement.prototype, 'src', {
+                set(val) {
+                    if (isRemote(val)) {
+                        console.warn('[pack-guard] Blocked remote image in pack:', val);
+                        this.title = 'Remote image blocked to protect your IP: ' + val;
+                        return origSet.call(this, SHIELD_SVG);
+                    }
+                    return origSet.call(this, val);
+                }
+            });
+        }
+    } catch (_) {}
+
+    window.addEventListener('error', function (e) {
+        const target = e.target;
+        if (target && target.tagName === 'IMG') {
+            const src = target.getAttribute('src') || '';
+            if (isRemote(src) || (target.src && target.src.startsWith('http') && !target.src.includes('localhost'))) {
+                target.src = SHIELD_SVG;
+                target.title = 'Remote image blocked: ' + src;
+            }
+        }
+    }, true);
+})();
+""".trimIndent()
 }

@@ -5,6 +5,7 @@ import r3.graffiti.GraffitiAPI
 import r3.graffiti.GraffitiP2P
 import r3.http.HandlerFactory
 import r3.http.WebServer
+import r3.key.Key128
 import r3.pke.name
 import java.io.File
 
@@ -57,6 +58,10 @@ fun cli(args: Array<String>) {
 		httpPort,
 		p2p.tmpDir
 	)
+	val startupKey = Key128.randomKey()
+	val authHandler = HandlerFactory.createAuthHandler(startupKey)
+	webserver.handlers.add(HandlerFactory.createHostOriginHandler())
+	webserver.handlers.add(authHandler)
 	webserver.handlers.add(HandlerFactory.createLogRouter())
 	webserver.handlers.add(HandlerFactory.createFileHandler(NativeResources.webDir))
 	val api = GraffitiAPI(
@@ -92,7 +97,7 @@ fun cli(args: Array<String>) {
 
 	webserver.start(0, true)
 	val actualHttpPort = webserver.myServerSocket.localPort
-	val url = "http://localhost:$actualHttpPort/index.html"
+	val url = "http://localhost:$actualHttpPort/$startupKey"
 	val isWindows = System.getProperty("os.name").lowercase().contains("win")
 	var useBrowserFallback = !isWindows
 

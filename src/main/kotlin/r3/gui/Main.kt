@@ -88,8 +88,7 @@ fun cli(args: Array<String>) {
 			}?.takeIf { it > 0L } ?: System.currentTimeMillis()
 			java.time.Instant.ofEpochMilli(timestamp)
 				.atZone(java.time.ZoneId.systemDefault())
-				.toLocalDate()
-				.toString()
+				.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd:HH"))
 		}
 	}
 	webserver.handlers.add(api)

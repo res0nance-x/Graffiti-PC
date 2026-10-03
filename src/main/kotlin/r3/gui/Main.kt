@@ -90,6 +90,27 @@ fun cli(args: Array<String>) {
 				.atZone(java.time.ZoneId.systemDefault())
 				.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd:HH"))
 		}
+		onOpenUrl = { targetUrl ->
+			try {
+				if (!java.awt.GraphicsEnvironment.isHeadless() &&
+					java.awt.Desktop.isDesktopSupported() &&
+					java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)
+				) {
+					java.awt.Desktop.getDesktop().browse(java.net.URI(targetUrl))
+					true
+				} else {
+					val os = System.getProperty("os.name").lowercase()
+					when {
+						os.contains("win") -> ProcessBuilder("cmd", "/c", "start", "\"\"", targetUrl).start()
+						os.contains("mac") -> ProcessBuilder("open", targetUrl).start()
+						else -> ProcessBuilder("xdg-open", targetUrl).start()
+					}
+					true
+				}
+			} catch (_: Exception) {
+				false
+			}
+		}
 	}
 	webserver.handlers.add(api)
 	webserver.tempFileManagerFactory = CustomTempFileManagerFactory { p2p.tmpDir }

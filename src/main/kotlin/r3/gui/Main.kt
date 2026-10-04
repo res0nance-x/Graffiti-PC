@@ -4,6 +4,7 @@ import r3.graffiti.CustomTempFileManagerFactory
 import r3.graffiti.GraffitiAPI
 import r3.graffiti.GraffitiP2P
 import r3.http.HandlerFactory
+import r3.http.RequestLogRouter
 import r3.http.WebServer
 import r3.key.Key128
 import r3.pke.name
@@ -62,7 +63,7 @@ fun cli(args: Array<String>) {
 	val authHandler = HandlerFactory.createAuthHandler(startupKey)
 	webserver.handlers.add(HandlerFactory.createHostOriginHandler())
 	webserver.handlers.add(authHandler)
-	webserver.handlers.add(HandlerFactory.createLogRouter())
+	webserver.handlers.add(RequestLogRouter(errorsOnly = true))
 	webserver.handlers.add(HandlerFactory.createFileHandler(NativeResources.webDir))
 	val api = GraffitiAPI(
 		p2p,

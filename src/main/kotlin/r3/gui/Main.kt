@@ -19,7 +19,11 @@ fun cli(args: Array<String>) {
 	val dirIdx = args.indexOf("--dir")
 	val dir = if (dirIdx >= 0 && dirIdx + 1 < args.size) File(args[dirIdx + 1])
 	else {
-		System.err.println("Usage: graffiti --dir <storage-dir> [--port <http-port>] [--p2p-port <p2p-port>] [--allow-internet] [--server-only] [--relay] [--quota <quota-mb>]"); return
+		System.err.println("Usage: graffiti --dir <storage-dir> [--port <http-port>] [--p2p-port <p2p-port>] [--allow-internet] [--server-only] [--relay] [--quota <quota-mb>] [--debug]"); return
+	}
+	val debug = "--debug" in args
+	if (debug) {
+		r3.io.debug = { msg -> println("[DEBUG] $msg") }
 	}
 	val allowInternet = "--allow-internet" in args
 	val serverOnly = "--server-only" in args

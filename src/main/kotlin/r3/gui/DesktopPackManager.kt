@@ -1,6 +1,7 @@
 package r3.gui
 
 import r3.content.BinaryContent
+import r3.content.Content
 import r3.encryption.EncryptedSource
 import r3.hash.hash256
 import r3.http.HandlerFactory
@@ -11,9 +12,8 @@ import r3.pack.BinaryPack
 import r3.pack.Pack
 import r3.pack.RAMPack
 import r3.pke.Password256
-import r3.source.FileSource
 import java.io.File
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import javax.swing.JOptionPane
 import javax.swing.JPasswordField
@@ -21,8 +21,12 @@ import kotlin.concurrent.thread
 
 object DesktopPackManager {
 	private val activePackServers = ConcurrentHashMap<String, WebServer>()
-
-	fun openPack(source: r3.source.Source, fileName: String, passwordStr: String? = null, allowInternet: Boolean = false): Pair<String, Int> {
+	fun openPack(
+		source: r3.source.Source,
+		fileName: String,
+		passwordStr: String? = null,
+		allowInternet: Boolean = false
+	): Pair<String, Int> {
 		val isEncrypted = fileName.endsWith(".epack", ignoreCase = true) || !passwordStr.isNullOrEmpty()
 		var pass = passwordStr
 
@@ -33,7 +37,6 @@ object DesktopPackManager {
 			}
 			pass = promptResult
 		}
-
 		val pack: Pack = if (isEncrypted) {
 			val p = Password256(pass!!.toByteArray().hash256())
 			val sequence = EncryptedSequence.createSequence(p)
@@ -42,14 +45,12 @@ object DesktopPackManager {
 		} else {
 			BinaryPack(source)
 		}
-
 		// Read keys to validate decryption/password
 		try {
-			pack.keys.size
+			pack.size
 		} catch (e: Exception) {
 			throw IllegalArgumentException("INVALID_PASSWORD")
 		}
-
 		val sessionId = UUID.randomUUID().toString()
 		val tmpDir = File(System.getProperty("java.io.tmpdir"))
 		val webserver = WebServer("localhost", 0, tmpDir)
@@ -125,8 +126,7 @@ object DesktopPackManager {
 			val file = NativeResources.webDir.resolve("playlist/index.html")
 			if (file.exists()) {
 				val bytes = file.readBytes()
-				val pack = RAMPack()
-				pack["index.html"] = BinaryContent(bytes, "index.html", "html")
+				val pack = RAMPack(listOf<Content>(BinaryContent(bytes, "index.html", "html")))
 				pack
 			} else {
 				val resourcePath = "playlist/index.html"
@@ -134,15 +134,14 @@ object DesktopPackManager {
 					?: ClassLoader.getSystemResourceAsStream(resourcePath)
 				val bytes = stream?.use { it.readBytes() }
 				if (bytes != null) {
-					val pack = RAMPack()
-					pack["index.html"] = BinaryContent(bytes, "index.html", "html")
+					val pack = RAMPack(listOf<Content>(BinaryContent(bytes, "index.html", "html")))
 					pack
 				} else {
-					RAMPack()
+					RAMPack(emptyList())
 				}
 			}
 		} catch (e: Exception) {
-			RAMPack()
+			RAMPack(emptyList())
 		}
 	}
 

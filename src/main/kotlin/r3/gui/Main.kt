@@ -81,11 +81,7 @@ fun cli(args: Array<String>) {
 		onClosePack = { sessionId ->
 			DesktopPackManager.closePack(sessionId)
 		}
-		if (!relay && !java.awt.GraphicsEnvironment.isHeadless()) {
-			onBellReceived = { _, sound ->
-				DesktopBellPlayer.play(sound)
-			}
-		}
+
 		onGetVersion = {
 			val codeSource = NativeResources::class.java.protectionDomain?.codeSource?.location
 			val timestamp = codeSource?.let {

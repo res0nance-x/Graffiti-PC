@@ -83,13 +83,23 @@ fun cli(args: Array<String>) {
 		}
 
 		onGetVersion = {
-			val codeSource = NativeResources::class.java.protectionDomain?.codeSource?.location
-			val timestamp = codeSource?.let {
-				runCatching { File(it.toURI()).lastModified() }.getOrNull()
-			}?.takeIf { it > 0L } ?: System.currentTimeMillis()
-			java.time.Instant.ofEpochMilli(timestamp)
-				.atZone(java.time.ZoneId.systemDefault())
-				.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd:HH"))
+			try {
+				NativeResources.webDir.resolve("build-date.txt")
+					.takeIf { it.exists() }
+					?.readText()?.trim()
+					?.takeIf { it.isNotEmpty() }
+					?: run {
+						val codeSource = NativeResources::class.java.protectionDomain?.codeSource?.location
+						val timestamp = codeSource?.let {
+							runCatching { File(it.toURI()).lastModified() }.getOrNull()
+						}?.takeIf { it > 0L } ?: System.currentTimeMillis()
+						java.time.Instant.ofEpochMilli(timestamp)
+							.atZone(java.time.ZoneId.systemDefault())
+							.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd:HH"))
+					}
+			} catch (_: Exception) {
+				"Unknown"
+			}
 		}
 		onOpenUrl = { targetUrl ->
 			try {

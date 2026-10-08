@@ -1,3 +1,6 @@
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+
 plugins {
 	kotlin("jvm") version "2.4.0"
 }
@@ -40,14 +43,32 @@ tasks.named<Jar>("jar") {
 
 
 
+val generateBuildDate = tasks.register("generateBuildDate") {
+	doLast {
+		val buildDateFile = file("../GraffitiCore/src/main/resources/web/build-date.txt")
+		val now = ZonedDateTime.now()
+		val formatted = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd:HH"))
+		if (!buildDateFile.exists() || buildDateFile.readText().trim() != formatted) {
+			buildDateFile.parentFile?.mkdirs()
+			buildDateFile.writeText("$formatted\n")
+			println("Updated build-date.txt to: $formatted")
+		}
+	}
+}
+
 val copyLib = tasks.register<Copy>("copyLib") {
 	from(file("lib"))
 	into(layout.buildDirectory.dir("libs/lib"))
 }
 
 val copyWeb = tasks.register<Copy>("copyWeb") {
+	dependsOn(generateBuildDate)
 	from(file("../GraffitiCore/src/main/resources/web"))
 	into(layout.buildDirectory.dir("libs/web"))
+}
+
+tasks.named("processResources") {
+	dependsOn(generateBuildDate)
 }
 
 val createAppImage = tasks.register<Exec>("createAppImage") {

@@ -45,10 +45,10 @@ object DesktopPackManager {
 		} else {
 			BinaryPack(source)
 		}
-		// Read keys to validate decryption/password
+		// Get first entry to see if password was valid
 		try {
-			pack.size
-		} catch (e: Exception) {
+			pack.iterator().next()
+		} catch (_: Exception) {
 			throw IllegalArgumentException("INVALID_PASSWORD")
 		}
 		val sessionId = UUID.randomUUID().toString()

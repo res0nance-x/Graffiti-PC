@@ -6,8 +6,10 @@ import r3.graffiti.GraffitiP2P
 import r3.http.HandlerFactory
 import r3.http.RequestLogRouter
 import r3.http.WebServer
+import r3.io.log
 import r3.key.Key128
 import r3.pke.name
+import java.awt.Toolkit
 import java.io.File
 
 fun main(args: Array<String>) {
@@ -35,6 +37,9 @@ fun cli(args: Array<String>) {
 	val quotaIdx = args.indexOf("--quota")
 	val quotaMb = if (quotaIdx >= 0 && quotaIdx + 1 < args.size) args[quotaIdx + 1].toLongOrNull() else null
 	val p2p = GraffitiP2P(dir, relayEnabledAtStartup = relay)
+	p2p.addOnMessageReceivedListener {key->
+		Toolkit.getDefaultToolkit().beep()
+	}
 	if (quotaMb != null) {
 		p2p.setQuotaBytes(quotaMb * 1024 * 1024)
 	}
@@ -81,7 +86,6 @@ fun cli(args: Array<String>) {
 		addOnClosePackListener { sessionId ->
 			DesktopPackManager.closePack(sessionId)
 		}
-
 		addOnGetVersionListener {
 			try {
 				NativeResources.webDir.resolve("build-date.txt")

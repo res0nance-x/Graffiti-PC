@@ -75,14 +75,14 @@ fun cli(args: Array<String>) {
 			webserver.sendToAllWebSockets(json.toString())
 		}
 	).apply {
-		onOpenPack = { source, fileName, password ->
+		addOnOpenPackListener { source, fileName, password ->
 			DesktopPackManager.openPack(source, fileName, password, allowInternet)
 		}
-		onClosePack = { sessionId ->
+		addOnClosePackListener { sessionId ->
 			DesktopPackManager.closePack(sessionId)
 		}
 
-		onGetVersion = {
+		addOnGetVersionListener {
 			try {
 				NativeResources.webDir.resolve("build-date.txt")
 					.takeIf { it.exists() }
@@ -101,7 +101,7 @@ fun cli(args: Array<String>) {
 				"Unknown"
 			}
 		}
-		onOpenUrl = { targetUrl ->
+		addOnOpenUrlListener { targetUrl ->
 			try {
 				if (!java.awt.GraphicsEnvironment.isHeadless() &&
 					java.awt.Desktop.isDesktopSupported() &&

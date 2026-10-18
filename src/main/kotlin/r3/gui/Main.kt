@@ -3,6 +3,7 @@ package r3.gui
 import r3.graffiti.CustomTempFileManagerFactory
 import r3.graffiti.GraffitiAPI
 import r3.graffiti.GraffitiP2P
+import r3.graffiti.SoundDebouncer
 import r3.http.HandlerFactory
 import r3.http.RequestLogRouter
 import r3.http.WebServer
@@ -37,8 +38,11 @@ fun cli(args: Array<String>) {
 	val quotaIdx = args.indexOf("--quota")
 	val quotaMb = if (quotaIdx >= 0 && quotaIdx + 1 < args.size) args[quotaIdx + 1].toLongOrNull() else null
 	val p2p = GraffitiP2P(dir, relayEnabledAtStartup = relay)
-	p2p.addOnMessageReceivedListener {key->
-		Toolkit.getDefaultToolkit().beep()
+	val soundDebouncer = SoundDebouncer()
+	p2p.addOnMessageReceivedListener { key ->
+		soundDebouncer.tryTrigger {
+			Toolkit.getDefaultToolkit().beep()
+		}
 	}
 	if (quotaMb != null) {
 		p2p.setQuotaBytes(quotaMb * 1024 * 1024)

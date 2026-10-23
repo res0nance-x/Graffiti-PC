@@ -7,7 +7,6 @@ import r3.graffiti.SoundDebouncer
 import r3.http.HandlerFactory
 import r3.http.RequestLogRouter
 import r3.http.WebServer
-import r3.io.log
 import r3.key.Key128
 import r3.pke.name
 import java.awt.Toolkit

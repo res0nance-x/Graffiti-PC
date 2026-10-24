@@ -36,7 +36,18 @@ fun cli(args: Array<String>) {
 	val p2pPort = if (p2pPortIdx >= 0 && p2pPortIdx + 1 < args.size) args[p2pPortIdx + 1].toIntOrNull() else null
 	val quotaIdx = args.indexOf("--quota")
 	val quotaMb = if (quotaIdx >= 0 && quotaIdx + 1 < args.size) args[quotaIdx + 1].toLongOrNull() else null
+	val relayMaxSizeIdx = args.indexOf("--relay-max-size")
+	val relayMaxSizeMb = if (relayMaxSizeIdx >= 0 && relayMaxSizeIdx + 1 < args.size) args[relayMaxSizeIdx + 1].toLongOrNull() else null
+	val autoDownloadIdx = args.indexOf("--auto-download-threshold")
+	val autoDownloadMb = if (autoDownloadIdx >= 0 && autoDownloadIdx + 1 < args.size) args[autoDownloadIdx + 1].toLongOrNull() else null
+
 	val p2p = GraffitiP2P(dir, relayEnabledAtStartup = relay)
+	if (relayMaxSizeMb != null) {
+		p2p.relayMaxContentSizeBytes = relayMaxSizeMb * 1024 * 1024L
+	}
+	if (autoDownloadMb != null) {
+		p2p.autoDownloadThresholdBytes = autoDownloadMb * 1024 * 1024L
+	}
 	val soundDebouncer = SoundDebouncer()
 	p2p.addOnMessageReceivedListener { key ->
 		soundDebouncer.tryTrigger {

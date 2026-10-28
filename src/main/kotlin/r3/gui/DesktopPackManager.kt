@@ -9,8 +9,10 @@ import r3.http.WebServer
 import r3.io.log
 import r3.math.EncryptedSequence
 import r3.pack.BinaryPack
+import r3.pack.MhtmlPack
 import r3.pack.Pack
 import r3.pack.RAMPack
+import r3.pack.ZipPack
 import r3.pke.Password256
 import java.io.File
 import java.util.*
@@ -21,6 +23,8 @@ import kotlin.concurrent.thread
 
 object DesktopPackManager {
 	private val activePackServers = ConcurrentHashMap<String, WebServer>()
+	private val activePacks = ConcurrentHashMap<String, Pack>()
+
 	fun openPack(
 		source: r3.source.Source,
 		fileName: String,
@@ -42,14 +46,20 @@ object DesktopPackManager {
 			val sequence = EncryptedSequence.createSequence(p)
 			val encryptedSrc = EncryptedSource(sequence, source)
 			BinaryPack(encryptedSrc)
+		} else if (fileName.endsWith(".mhtml", ignoreCase = true) || fileName.endsWith(".mht", ignoreCase = true)) {
+			MhtmlPack(source)
+		} else if (fileName.endsWith(".zip", ignoreCase = true)) {
+			ZipPack(source)
 		} else {
 			BinaryPack(source)
 		}
 		// Get first entry to see if password was valid
-		try {
-			pack.iterator().next()
-		} catch (_: Exception) {
-			throw IllegalArgumentException("INVALID_PASSWORD")
+		if (isEncrypted) {
+			try {
+				pack.iterator().next()
+			} catch (_: Exception) {
+				throw IllegalArgumentException("INVALID_PASSWORD")
+			}
 		}
 		val sessionId = UUID.randomUUID().toString()
 		val tmpDir = File(System.getProperty("java.io.tmpdir"))
@@ -62,6 +72,7 @@ object DesktopPackManager {
 		webserver.start(0, true)
 		val port = webserver.listeningPort
 		activePackServers[sessionId] = webserver
+		activePacks[sessionId] = pack
 
 		thread(name = "PackViewer-$sessionId", isDaemon = true) {
 			try {
@@ -99,6 +110,14 @@ object DesktopPackManager {
 				System.err.println("Error stopping Pack WebServer session $sessionId: ${e.message}")
 			}
 		}
+		val pack = activePacks.remove(sessionId)
+		if (pack is AutoCloseable) {
+			try {
+				pack.close()
+			} catch (e: Exception) {
+				System.err.println("Error closing pack session $sessionId: ${e.message}")
+			}
+		}
 	}
 
 	private fun showPasswordDialog(packName: String): String? {
@@ -132,6 +151,8 @@ object DesktopPackManager {
 				val resourcePath = "playlist/index.html"
 				val stream = Thread.currentThread().contextClassLoader?.getResourceAsStream(resourcePath)
 					?: ClassLoader.getSystemResourceAsStream(resourcePath)
+					?: Thread.currentThread().contextClassLoader?.getResourceAsStream("web/$resourcePath")
+					?: ClassLoader.getSystemResourceAsStream("web/$resourcePath")
 				val bytes = stream?.use { it.readBytes() }
 				if (bytes != null) {
 					val pack = RAMPack(listOf<Content>(BinaryContent(bytes, "index.html", "html")))

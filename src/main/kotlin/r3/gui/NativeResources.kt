@@ -1,6 +1,5 @@
 package r3.gui
 
-import r3.gui.NativeResources.libDir
 import java.io.File
 
 /**

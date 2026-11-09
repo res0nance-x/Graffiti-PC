@@ -97,6 +97,9 @@ fun cli(args: Array<String>) {
 		addOnOpenPackListener { source, fileName, password ->
 			DesktopPackManager.openPack(source, fileName, password, allowInternet)
 		}
+		addOnOpenPackInstanceListener { pack, title ->
+			DesktopPackManager.openPackInstance(pack, title)
+		}
 		addOnClosePackListener { sessionId ->
 			DesktopPackManager.closePack(sessionId)
 		}

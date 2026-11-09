@@ -57,6 +57,13 @@ object DesktopPackManager {
 				throw IllegalArgumentException("INVALID_PASSWORD")
 			}
 		}
+		return openPackInstance(pack, "PackViewer - $fileName")
+	}
+
+	fun openPackInstance(
+		pack: Pack,
+		title: String = "PackViewer"
+	): Pair<String, Int> {
 		val sessionId = UUID.randomUUID().toString()
 		val tmpDir = File(System.getProperty("java.io.tmpdir"))
 		val webserver = WebServer("localhost", 0, tmpDir)
@@ -75,7 +82,7 @@ object DesktopPackManager {
 				val url = "http://localhost:$port/"
 				log("Opening PackViewer window at $url")
 				WebView(false).use { wv ->
-					wv.setTitle("PackViewer")
+					wv.setTitle(title)
 						.setIcon(NativeResources.webDir.resolve("favicon.ico"))
 						.setSize(1024, 768)
 						.init(packGuardScript())

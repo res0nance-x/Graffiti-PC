@@ -21,7 +21,7 @@ fun cli(args: Array<String>) {
 	val dirIdx = args.indexOf("--dir")
 	val dir = if (dirIdx >= 0 && dirIdx + 1 < args.size) File(args[dirIdx + 1])
 	else {
-		System.err.println("Usage: graffiti --dir <storage-dir> [--port <http-port>] [--p2p-port <p2p-port>] [--allow-internet] [--server-only] [--relay] [--quota <quota-mb>] [--debug]"); return
+		System.err.println("Usage: graffiti --dir <storage-dir> [--port <http-port>] [--p2p-port <p2p-port>] [--allow-internet] [--server-only] [--relay] [--bridge] [--quota <quota-mb>] [--debug]"); return
 	}
 	val debug = "--debug" in args
 	if (debug) {
@@ -30,6 +30,7 @@ fun cli(args: Array<String>) {
 	val allowInternet = "--allow-internet" in args
 	val serverOnly = "--server-only" in args
 	val relay = "--relay" in args
+	val bridge = "--bridge" in args
 	val portIdx = args.indexOf("--port")
 	val httpPort = if (portIdx >= 0 && portIdx + 1 < args.size) args[portIdx + 1].toIntOrNull() ?: 0 else 0
 	val p2pPortIdx = args.indexOf("--p2p-port")
@@ -41,7 +42,7 @@ fun cli(args: Array<String>) {
 	val autoDownloadIdx = args.indexOf("--auto-download-threshold")
 	val autoDownloadMb = if (autoDownloadIdx >= 0 && autoDownloadIdx + 1 < args.size) args[autoDownloadIdx + 1].toLongOrNull() else null
 
-	val p2p = GraffitiP2P(dir, relayEnabledAtStartup = relay)
+	val p2p = GraffitiP2P(dir, relayEnabledAtStartup = relay, bridgeEnabledAtStartup = bridge)
 	if (relayMaxSizeMb != null) {
 		p2p.relayMaxContentSizeBytes = relayMaxSizeMb * 1024 * 1024L
 	}
